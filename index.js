@@ -30,7 +30,10 @@ function loadPackages(packages, cb){
   packages.forEach(function(pkg){
     var pkgPath = path.resolve(process.cwd(), 'node_modules', pkg);
     try {
-      
+      if(pkg.indexOf('.') > -1){
+        console.log('Naming', pkg,' as', pkg.replace(/\./g, '-'), 'in repl for ease of use');
+        pkg = pkg.replace(/\./g, '-');
+      }
       loadedPackages[pkg] = require(pkgPath);
     } catch(e) {
       return cb(e);
