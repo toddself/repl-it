@@ -8,7 +8,7 @@ Creates a repl in the current directory with all the packages listed in `devDepe
 ~/src/awesome-node-project> cat package.json
 {
   "name": "repl-it",
-  "version": "0.0.0",
+  "version": "1.0.1",
   "description": "Loads all the packages in your package.json and creates a repl for you",
   "main": "index.js",
   "scripts": {
@@ -31,11 +31,20 @@ Creates a repl in the current directory with all the packages listed in `devDepe
   },
   "homepage": "https://github.com/toddself/repl-it",
   "dependencies": {
+    "camel-case": "^1.0.2",
     "xtend": "^4.0.0"
   }
 }
 ~/src/awesome-node-project> repl-it
 repl-it> typeof xtend
+'function'
+repl-it>
+```
+
+Packages are automatically camelcased for you.
+```
+~/src/awesome-node-project> repl-it
+repl-it> typeof camelCase
 'function'
 repl-it>
 ```
