@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/toddself/repl-it",
   "dependencies": {
+    "camel-case": "^1.0.2",
     "xtend": "^4.0.0"
   }
 }

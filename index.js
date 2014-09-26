@@ -5,6 +5,7 @@ var repl = require('repl');
 var fs = require('fs');
 var path = require('path');
 var xtend = require('xtend');
+var camelCase = require('camel-case');
 
 function readPackage(cb){
   var pkg = path.join(process.cwd(), 'package.json');
@@ -34,6 +35,7 @@ function loadPackages(packages, cb){
         console.log('Naming', pkg,' as', pkg.replace(/\./g, '-'), 'in repl for ease of use');
         pkg = pkg.replace(/\./g, '-');
       }
+      pkg = camelCase(pkg);
       loadedPackages[pkg] = require(pkgPath);
     } catch(e) {
       return cb(e);
