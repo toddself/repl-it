@@ -33,8 +33,17 @@ function readPackage(prefix, cb){
       return cb(e);
     }
 
-    cb(null, packages, data.name);
+    cb(null, packages, data.name, data.main || 'index.js');
   });
+}
+
+function loadPackage(pkg, pkgPath, loadedPackages) {
+  if(pkg.indexOf('.') > -1){
+    console.log('Naming', pkg, 'as', pkg.replace(/\./g, '-'), 'in repl for ease of use');
+    pkg = pkg.replace(/\./g, '-');
+  }
+  pkg = camelCase(pkg);
+  loadedPackages[pkg] = require(pkgPath);
 }
 
 function loadPackages(prefix, packages, cb){
@@ -42,12 +51,7 @@ function loadPackages(prefix, packages, cb){
   packages.forEach(function(pkg){
     var pkgPath = path.resolve(prefix, 'node_modules', pkg);
     try {
-      if(pkg.indexOf('.') > -1){
-        console.log('Naming', pkg, 'as', pkg.replace(/\./g, '-'), 'in repl for ease of use');
-        pkg = pkg.replace(/\./g, '-');
-      }
-      pkg = camelCase(pkg);
-      loadedPackages[pkg] = require(pkgPath);
+      loadPackage(pkg, pkgPath, loadedPackages);
     } catch(e) {
       return cb(e);
     }
@@ -64,14 +68,22 @@ function handleError(err){
 }
 
 var replit = module.exports = function(){
+  var loadMain = process.argv[2] == '--load-main';
+
   getPrefix(function (err, prefix) {
     handleError(err);
 
-    readPackage(prefix, function(err, packages, projectName){
+    readPackage(prefix, function(err, packages, projectName, projectMain){
       handleError(err);
 
       loadPackages(prefix, packages, function(err, pkgs){
         handleError(err);
+
+        if (loadMain) {
+          // Load main package.
+          var main = path.resolve(prefix, projectMain);
+          loadPackage(projectName, main, pkgs);
+        }
 
         var r = repl.start({
           prompt: projectName+'> '
