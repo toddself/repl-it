@@ -1,6 +1,6 @@
 # repl-it
 
-Creates a repl in the current directory with all the packages listed in `devDependencies` and `dependencies` loaded into the local context.
+Creates a repl in the current directory with all the packages listed in `devDependencies` and `dependencies` loaded into the local context. Uses pkginfo to determine the root of your project.
 
 # Usage
 
@@ -32,13 +32,20 @@ Creates a repl in the current directory with all the packages listed in `devDepe
   "homepage": "https://github.com/toddself/repl-it",
   "dependencies": {
     "camel-case": "^1.0.2",
+    "pkginfo": "^0.3.0",
     "xtend": "^4.0.0"
   }
 }
-~/src/awesome-node-project> repl-it
+~/src/repl-it> repl-it
 repl-it> typeof xtend
 'function'
-repl-it>
+repl-it> typeof camelCase
+'function'
+repl-it> ^D
+~/src/repl-it> cd test
+~/src/repl-it/test> repl-it
+repl-it> typeof camelCase
+'function'
 ```
 
 Packages are automatically camelcased for you.
@@ -56,6 +63,10 @@ repl-it>
 # Tests
 
 None yet.  Probably not ever.  Eh.
+
+# Contributors
+
+* [eush77](https://github.com/eush77)
 
 # License
 
