@@ -37,13 +37,13 @@ function readPackage(prefix, cb){
   });
 }
 
-function loadPackage(pkg, pkgPath, loadedPackages) {
+function getPackageDisplayName(pkg){
   if(pkg.indexOf('.') > -1){
     console.log('Naming', pkg, 'as', pkg.replace(/\./g, '-'), 'in repl for ease of use');
     pkg = pkg.replace(/\./g, '-');
   }
   pkg = camelCase(pkg);
-  loadedPackages[pkg] = require(pkgPath);
+  return pkg;
 }
 
 function loadPackages(prefix, packages, cb){
@@ -51,11 +51,11 @@ function loadPackages(prefix, packages, cb){
   packages.forEach(function(pkg){
     var pkgPath = path.resolve(prefix, 'node_modules', pkg);
     try {
-      loadPackage(pkg, pkgPath, loadedPackages);
+      pkg = getPackageDisplayName(pkg);
+      loadedPackages[pkg] = require(pkgPath);
     } catch(e) {
       return cb(e);
     }
-    
   });
   cb(null, loadedPackages);
 }
@@ -68,7 +68,7 @@ function handleError(err){
 }
 
 var replit = module.exports = function(){
-  var loadMain = process.argv[2] == '--load-main';
+  var shouldLoadMain = process.argv[2] == '--load-main';
 
   getPrefix(function (err, prefix) {
     handleError(err);
@@ -79,17 +79,40 @@ var replit = module.exports = function(){
       loadPackages(prefix, packages, function(err, pkgs){
         handleError(err);
 
-        if (loadMain) {
-          // Load main package.
-          var main = path.resolve(prefix, projectMain);
-          loadPackage(projectName, main, pkgs);
+        var mainPackageLoaded = false;
+
+        var loadMain = function (context) {
+          var displayName = getPackageDisplayName(projectName);
+          var pkgPath = path.resolve(prefix, projectMain);
+          context[displayName] = require(pkgPath);
+
+          console.log('Main package loaded as ' + displayName);
+          mainPackageLoaded = true;
+        };
+
+        if (shouldLoadMain) {
+          loadMain(pkgs);
         }
 
         var r = repl.start({
           prompt: projectName+'> '
         });
+
         Object.keys(pkgs).forEach(function(p){
           r.context[p] = pkgs[p];
+        });
+
+        r.defineCommand('loadmain', {
+          help: 'Load the main entry from your package.json into the repl context',
+          action: function() {
+            if (mainPackageLoaded) {
+              console.log('Main package already loaded!');
+            }
+            else {
+              loadMain(r.context);
+            }
+            this.displayPrompt();
+          }
         });
       });
     });
