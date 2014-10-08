@@ -38,16 +38,12 @@ function readPackage(prefix, cb){
 }
 
 function getPackageDisplayName(pkg){
-  var newPkg;
-  if(pkg.indexOf('.') > -1){
-    newPkg = pkg.replace(/\./g, '-');
-  } 
-  newPkg = camelCase(pkg);
+  var newPkg = camelCase(pkg);
 
   if(pkg !== newPkg){
-    console.log('Naming', pkg, 'as', newPkg.replace(/\./g, '-'), 'in repl');
+    console.log('Naming', pkg, 'as', newPkg, 'in repl');
   }
-  
+
   return newPkg;
 }
 
