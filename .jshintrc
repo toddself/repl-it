@@ -1,0 +1,18 @@
+{
+  "curly": false,
+  "noempty": true,
+  "newcap": true,
+  "eqeqeq": true,
+  "eqnull": true,
+  "undef": true,
+  "devel": true,
+  "node": true,
+  "browser": false,
+  "evil": false,
+  "latedef": true,
+  "nonew": true,
+  "trailing": true,
+  "immed": true,
+  "smarttabs": true,
+  "strict": true
+}
