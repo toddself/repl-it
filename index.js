@@ -38,21 +38,30 @@ function readPackage(prefix, cb){
 }
 
 function getPackageDisplayName(pkg){
+  var newPkg;
   if(pkg.indexOf('.') > -1){
-    console.log('Naming', pkg, 'as', pkg.replace(/\./g, '-'), 'in repl for ease of use');
-    pkg = pkg.replace(/\./g, '-');
+    newPkg = pkg.replace(/\./g, '-');
+  } 
+  newPkg = camelCase(pkg);
+
+  if(pkg !== newPkg){
+    console.log('Naming', pkg, 'as', newPkg.replace(/\./g, '-'), 'in repl');
   }
-  pkg = camelCase(pkg);
-  return pkg;
+  
+  return newPkg;
 }
 
 function loadPackages(prefix, packages, cb){
   var loadedPackages = {};
   packages.forEach(function(pkg){
     var pkgPath = path.resolve(prefix, 'node_modules', pkg);
+    var pkgName;
     try {
-      pkg = getPackageDisplayName(pkg);
-      loadedPackages[pkg] = require(pkgPath);
+      pkgName = getPackageDisplayName(pkg);
+      if(loadedPackages[pkgName]){
+        console.log(pkgName, 'is already defined. Current definition being overwritten by', pkg);
+      }
+      loadedPackages[pkgName] = require(pkgPath);
     } catch(e) {
       return cb(e);
     }
