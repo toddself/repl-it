@@ -68,7 +68,7 @@ function handleError(err){
 }
 
 var replit = module.exports = function(){
-  var shouldLoadMain = process.argv[2] == '--load-main';
+  var shouldLoadMain = process.argv[2] === '--load-main';
 
   getPrefix(function (err, prefix) {
     handleError(err);
