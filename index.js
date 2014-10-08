@@ -1,24 +1,52 @@
 #!/usr/bin/env node
-'use strict';
+"use strict";
 
-var repl = require('repl');
-var fs = require('fs');
-var path = require('path');
-var xtend = require('xtend');
-var camelCase = require('camel-case');
-var pkginfo = require('pkginfo');
+var repl      = require("repl");
+var fs        = require("fs");
+var path      = require("path");
+var xtend     = require("xtend");
+var camelCase = require("camel-case");
+var pkginfo   = require("pkginfo");
 
-function getPrefix(cb){
+var Replit = exports = module.exports = function Replit() {
+  if (!(this instanceof Replit)) {
+    return new Replit();
+  }
+  
+  var replInstance = this;
+  
+  replInstance.getPrefix(function (err, prefix) {
+    replInstance.handleError(err);
+
+    replInstance.readPackage(prefix, function(err, packages, projectName) {
+      replInstance.handleError(err);
+
+      replInstance.loadPackages(prefix, packages, function(err, pkgs) {
+        replInstance.handleError(err);
+
+        var r = repl.start({
+          prompt: projectName+"> "
+        });
+
+        Object.keys(pkgs).forEach(function(p) {
+          r.context[p] = pkgs[p];
+        });
+      });
+    });
+  });
+};
+
+Replit.prototype.getPrefix = function(cb) {
   try {
     var prefix = path.resolve(pkginfo.find(null, process.cwd()), '..');
-    return cb(null, prefix);
+    return cb.call(this, null, prefix);
   }
   catch (err) {
     return cb(err);
   }
 }
 
-function readPackage(prefix, cb){
+Replit.prototype.readPackage = function(prefix, cb) {
   var pkg = path.join(prefix, 'package.json');
   fs.readFile(pkg, 'utf8', function(err, data){
     if(err){
@@ -33,11 +61,11 @@ function readPackage(prefix, cb){
       return cb(e);
     }
 
-    cb(null, packages, data.name);
+    cb.call(this, null, packages, data.name);
   });
 }
 
-function loadPackages(prefix, packages, cb){
+Replit.prototype.loadPackages = function(prefix, packages, cb) {
   var loadedPackages = {};
   packages.forEach(function(pkg){
     var pkgPath = path.resolve(prefix, 'node_modules', pkg);
@@ -53,37 +81,16 @@ function loadPackages(prefix, packages, cb){
     }
     
   });
-  cb(null, loadedPackages);
+  cb.call(this, null, loadedPackages);
 }
 
-function handleError(err){
+Replit.prototype.handleError = function(err) {
   if (err) {
     console.log(err);
     process.exit(1);
   }
 }
 
-var replit = module.exports = function(){
-  getPrefix(function (err, prefix) {
-    handleError(err);
-
-    readPackage(prefix, function(err, packages, projectName){
-      handleError(err);
-
-      loadPackages(prefix, packages, function(err, pkgs){
-        handleError(err);
-
-        var r = repl.start({
-          prompt: projectName+'> '
-        });
-        Object.keys(pkgs).forEach(function(p){
-          r.context[p] = pkgs[p];
-        });
-      });
-    });
-  });
-};
-
-if(!module.parent){
-  replit();
+if (!module.parent) {
+  Replit();
 }
