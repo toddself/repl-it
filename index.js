@@ -10,8 +10,8 @@ var pkginfo = require('pkginfo');
 var Replit = module.exports = function(opts){
   if (!(this instanceof Replit)) {
     return new Replit(opts);
-  }  
-  
+  }
+
   this.opts = opts;
   var replInstance = this;
 
@@ -31,7 +31,10 @@ var Replit = module.exports = function(opts){
           var pkgPath = path.resolve(prefix, projectMain);
           context[displayName] = require(pkgPath);
 
-          console.log('Main package loaded as ' + displayName);
+          if(this.opts.verbose){
+            console.log('Main package loaded as ' + displayName);
+          }
+
           mainPackageLoaded = true;
         };
 
@@ -81,7 +84,7 @@ Replit.prototype.readPackage = function(prefix, cb){
       return cb(err);
     }
     var packages;
-    
+
     try {
       data = JSON.parse(data);
       packages = Object.keys(xtend(data.devDependencies, data.dependencies));
