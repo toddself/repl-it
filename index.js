@@ -8,90 +8,27 @@ var xtend = require('xtend');
 var camelCase = require('camel-case');
 var pkginfo = require('pkginfo');
 
-function getPrefix(cb){
-  try {
-    var prefix = path.resolve(pkginfo.find(null, process.cwd()), '..');
-    return cb(null, prefix);
-  }
-  catch (err) {
-    return cb(err);
-  }
-}
-
-function readPackage(prefix, cb){
-  var pkg = path.join(prefix, 'package.json');
-  fs.readFile(pkg, 'utf8', function(err, data){
-    if(err){
-      return cb(err);
-    }
-    var packages;
-    
-    try {
-      data = JSON.parse(data);
-      packages = Object.keys(xtend(data.devDependencies, data.dependencies));
-    } catch (e) {
-      return cb(e);
-    }
-
-    cb(null, packages, data.name, data.main || 'index.js');
-  });
-}
-
-function getPackageDisplayName(pkg){
-  var newPkg;
-  if(pkg.indexOf('.') > -1){
-    newPkg = pkg.replace(/\./g, '-');
-  } 
-  newPkg = camelCase(pkg);
-
-  if(pkg !== newPkg){
-    console.log('Naming', pkg, 'as', newPkg.replace(/\./g, '-'), 'in repl');
-  }
+var Replit = exports = module.exports = function(){
+  if (!(this instanceof Replit)) {
+    return new Replit();
+  }  
   
-  return newPkg;
-}
-
-function loadPackages(prefix, packages, cb){
-  var loadedPackages = {};
-  packages.forEach(function(pkg){
-    var pkgPath = path.resolve(prefix, 'node_modules', pkg);
-    var pkgName;
-    try {
-      pkgName = getPackageDisplayName(pkg);
-      if(loadedPackages[pkgName]){
-        console.log(pkgName, 'is already defined. Current definition being overwritten by', pkg);
-      }
-      loadedPackages[pkgName] = require(pkgPath);
-    } catch(e) {
-      return cb(e);
-    }
-  });
-  cb(null, loadedPackages);
-}
-
-function handleError(err){
-  if (err) {
-    console.log(err);
-    process.exit(1);
-  }
-}
-
-var replit = module.exports = function(){
+  var replInstance = this;
   var shouldLoadMain = process.argv[2] === '--load-main';
 
-  getPrefix(function (err, prefix) {
-    handleError(err);
+  replInstance.getPrefix(function (err, prefix) {
+    replInstance.handleError(err);
 
-    readPackage(prefix, function(err, packages, projectName, projectMain){
-      handleError(err);
+    replInstance.readPackage(prefix, function(err, packages, projectName, projectMain){
+      replInstance.handleError(err);
 
-      loadPackages(prefix, packages, function(err, pkgs){
-        handleError(err);
+      replInstance.loadPackages(prefix, packages, function(err, pkgs){
+        replInstance.handleError(err);
 
         var mainPackageLoaded = false;
 
         var loadMain = function (context) {
-          var displayName = getPackageDisplayName(projectName);
+          var displayName = replInstance.getPackageDisplayName(projectName);
           var pkgPath = path.resolve(prefix, projectMain);
           context[displayName] = require(pkgPath);
 
@@ -128,6 +65,75 @@ var replit = module.exports = function(){
   });
 };
 
+Replit.prototype.getPrefix = function(cb){
+  try {
+    var prefix = path.resolve(pkginfo.find(null, process.cwd()), '..');
+    return cb.call(this, null, prefix);
+  }
+  catch (err) {
+    return cb(err);
+  }
+};
+
+Replit.prototype.readPackage = function(prefix, cb){
+  var pkg = path.join(prefix, 'package.json');
+  fs.readFile(pkg, 'utf8', function(err, data){
+    if(err){
+      return cb(err);
+    }
+    var packages;
+    
+    try {
+      data = JSON.parse(data);
+      packages = Object.keys(xtend(data.devDependencies, data.dependencies));
+    } catch (e) {
+      return cb(e);
+    }
+
+    cb.call(this, null, packages, data.name, data.main || 'index.js');
+  });
+};
+
+Replit.prototype.getPackageDisplayName = function(pkg){
+  var newPkg;
+  if(pkg.indexOf('.') > -1){
+    newPkg = pkg.replace(/\./g, '-');
+  } 
+  newPkg = camelCase(pkg);
+
+  if(pkg !== newPkg){
+    console.log('Naming', pkg, 'as', newPkg.replace(/\./g, '-'), 'in repl');
+  }
+  
+  return newPkg;
+};
+
+Replit.prototype.loadPackages = function(prefix, packages, cb){
+  var that = this;
+  var loadedPackages = {};
+  packages.forEach(function(pkg){
+    var pkgPath = path.resolve(prefix, 'node_modules', pkg);
+    var pkgName;
+    try {
+      pkgName = that.getPackageDisplayName(pkg);
+      if(loadedPackages[pkgName]){
+        console.log(pkgName, 'is already defined. Current definition being overwritten by', pkg);
+      }
+      loadedPackages[pkgName] = require(pkgPath);
+    } catch(e) {
+      return cb(e);
+    }
+  });
+  cb.call(this, null, loadedPackages);
+};
+
+Replit.prototype.handleError = function(err){
+  if (err) {
+    console.log(err);
+    process.exit(1);
+  }
+};
+
 if(!module.parent){
-  replit();
+  Replit();
 }
