@@ -8,7 +8,7 @@ var xtend = require('xtend');
 var camelCase = require('camel-case');
 var pkginfo = require('pkginfo');
 
-var Replit = exports = module.exports = function(){
+var Replit = module.exports = function(){
   if (!(this instanceof Replit)) {
     return new Replit();
   }  
