@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 'use strict';
 
 var repl = require('repl');
@@ -8,13 +7,13 @@ var xtend = require('xtend');
 var camelCase = require('camel-case');
 var pkginfo = require('pkginfo');
 
-var Replit = module.exports = function(){
+var Replit = module.exports = function(opts){
   if (!(this instanceof Replit)) {
-    return new Replit();
+    return new Replit(opts);
   }  
   
+  this.opts = opts;
   var replInstance = this;
-  var shouldLoadMain = process.argv[2] === '--load-main';
 
   replInstance.getPrefix(function (err, prefix) {
     replInstance.handleError(err);
@@ -36,7 +35,7 @@ var Replit = module.exports = function(){
           mainPackageLoaded = true;
         };
 
-        if (shouldLoadMain) {
+        if (this.opts.loadmain) {
           loadMain(pkgs);
         }
 
@@ -98,7 +97,7 @@ Replit.prototype.getPackageDisplayName = function(pkg){
   var newPkg;
   newPkg = camelCase(pkg);
 
-  if(pkg !== newPkg){
+  if(pkg !== newPkg && this.opts.verbose){
     console.log('Naming', pkg, 'as', newPkg, 'in repl');
   }
 
@@ -130,7 +129,3 @@ Replit.prototype.handleError = function(err){
     process.exit(1);
   }
 };
-
-if(!module.parent){
-  Replit();
-}

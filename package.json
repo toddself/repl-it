@@ -8,7 +8,7 @@
     "lint": "jshint *js"
   },
   "bin": {
-    "repl-it": "./index.js"
+    "repl-it": "./cli.js"
   },
   "repository": {
     "type": "git",
@@ -25,6 +25,7 @@
   "homepage": "https://github.com/toddself/repl-it",
   "dependencies": {
     "camel-case": "^1.0.2",
+    "minimist": "~1.1.0",
     "pkginfo": "^0.3.0",
     "xtend": "^4.0.0"
   },
