@@ -37,27 +37,27 @@ function readPackage(prefix, cb){
   });
 }
 
-function getPackageDisplayName(pkg){
+function getPackageDisplayName(pkg, verbose){
   var newPkg;
   if(pkg.indexOf('.') > -1){
     newPkg = pkg.replace(/\./g, '-');
   } 
   newPkg = camelCase(pkg);
 
-  if(pkg !== newPkg){
+  if(verbose && pkg !== newPkg){
     console.log('Naming', pkg, 'as', newPkg.replace(/\./g, '-'), 'in repl');
   }
   
   return newPkg;
 }
 
-function loadPackages(prefix, packages, cb){
+function loadPackages(prefix, packages, verbose, cb){
   var loadedPackages = {};
   packages.forEach(function(pkg){
     var pkgPath = path.resolve(prefix, 'node_modules', pkg);
     var pkgName;
     try {
-      pkgName = getPackageDisplayName(pkg);
+      pkgName = getPackageDisplayName(pkg, verbose);
       if(loadedPackages[pkgName]){
         console.log(pkgName, 'is already defined. Current definition being overwritten by', pkg);
       }
@@ -76,8 +76,37 @@ function handleError(err){
   }
 }
 
+function usage(){
+  console.log('Usage:  repl-it [--verbose | -v] [--load-main]');
+  process.exit(1);
+}
+
+function parseOptions(){
+  var options = {};
+
+  process.argv.slice(2).forEach(function (arg) {
+    if (arg === '-v' || arg === '--verbose') {
+      if (options.verbose) {
+        usage();
+      }
+      options.verbose = true;
+    }
+    else if (arg === '--load-main') {
+      if (options.loadMain) {
+        usage();
+      }
+      options.loadMain = true;
+    }
+    else {
+      usage();
+    }
+  });
+
+  return options;
+}
+
 var replit = module.exports = function(){
-  var shouldLoadMain = process.argv[2] === '--load-main';
+  var options = parseOptions();
 
   getPrefix(function (err, prefix) {
     handleError(err);
@@ -85,7 +114,7 @@ var replit = module.exports = function(){
     readPackage(prefix, function(err, packages, projectName, projectMain){
       handleError(err);
 
-      loadPackages(prefix, packages, function(err, pkgs){
+      loadPackages(prefix, packages, options.verbose, function(err, pkgs){
         handleError(err);
 
         var mainPackageLoaded = false;
@@ -95,11 +124,13 @@ var replit = module.exports = function(){
           var pkgPath = path.resolve(prefix, projectMain);
           context[displayName] = require(pkgPath);
 
-          console.log('Main package loaded as ' + displayName);
+          if (options.verbose) {
+            console.log('Main package loaded as ' + displayName);
+          }
           mainPackageLoaded = true;
         };
 
-        if (shouldLoadMain) {
+        if (options.loadMain) {
           loadMain(pkgs);
         }
 
