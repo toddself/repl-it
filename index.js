@@ -85,13 +85,13 @@ function parseOptions(){
   var options = {};
 
   process.argv.slice(2).forEach(function (arg) {
-    if (arg == '-v' || arg == '--verbose') {
+    if (arg === '-v' || arg === '--verbose') {
       if (options.verbose) {
         usage();
       }
       options.verbose = true;
     }
-    else if (arg == '--load-main') {
+    else if (arg === '--load-main') {
       if (options.loadMain) {
         usage();
       }
