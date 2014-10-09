@@ -67,6 +67,7 @@ None yet.  Probably not ever.  Eh.
 # Contributors
 
 * Eugene Sharygin ([eush77](https://github.com/eush77))
+* Evan Senter ([evansenter](https://github.com/evansenter))
 
 # License
 
