@@ -31,7 +31,7 @@ var Replit = module.exports = function(opts){
           var pkgPath = path.resolve(prefix, projectMain);
           context[displayName] = require(pkgPath);
 
-          if(this.opts.verbose){
+          if(opts.verbose){
             console.log('Main package loaded as ' + displayName);
           }
 
