@@ -25,11 +25,11 @@ var Replit = module.exports = function(opts){
         replInstance.handleError(err);
 
         var mainPackageLoaded = false;
+        var mainPackagePath = path.resolve(prefix, projectMain);
 
         var loadMain = function (context) {
           var displayName = replInstance.getPackageDisplayName(projectName);
-          var pkgPath = path.resolve(prefix, projectMain);
-          context[displayName] = require(pkgPath);
+          context[displayName] = require(mainPackagePath);
 
           if(opts.verbose){
             console.log('Main package loaded as ' + displayName);
@@ -57,6 +57,20 @@ var Replit = module.exports = function(opts){
               console.log('Main package already loaded!');
             }
             else {
+              loadMain(r.context);
+            }
+            this.displayPrompt();
+          }
+        });
+
+        r.defineCommand('reload', {
+          help: 'Reload the main package',
+          action: function() {
+            if (!mainPackageLoaded) {
+              console.log('Main package is not loaded. You need to load it first.');
+            }
+            else {
+              delete require.cache[mainPackagePath];
               loadMain(r.context);
             }
             this.displayPrompt();
