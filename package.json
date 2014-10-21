@@ -1,6 +1,6 @@
 {
   "name": "repl-it",
-  "version": "2.0.3",
+  "version": "2.1.0",
   "description": "Loads all the packages in your package.json and creates a repl for you",
   "main": "index.js",
   "scripts": {
