@@ -43,7 +43,8 @@ var Replit = module.exports = function(opts){
         }
 
         var r = repl.start({
-          prompt: projectName+'> '
+          prompt: projectName+'> ',
+          useGlobal: true
         });
 
         Object.keys(pkgs).forEach(function(p){
