@@ -135,7 +135,7 @@ Replit.prototype.loadPackages = function(prefix, packages, cb){
       }
       loadedPackages[pkgName] = require(pkgPath);
     } catch(e) {
-      return cb(e);
+      console.log('Failed to load', pkg);
     }
   });
   cb.call(this, null, loadedPackages);
