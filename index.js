@@ -115,6 +115,10 @@ Replit.prototype.getPackageDisplayName = function(pkg){
   var newPkg;
   newPkg = camelCase(pkg);
 
+  if (!/^[a-z_$]/i.exec(newPkg)) {
+    newPkg = '_' + newPkg;
+  }
+
   if(pkg !== newPkg && this.opts.verbose){
     console.log('Naming', pkg, 'as', newPkg, 'in repl');
   }
