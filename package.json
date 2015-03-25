@@ -4,8 +4,8 @@
   "description": "Loads all the packages in your package.json and creates a repl for you",
   "main": "index.js",
   "scripts": {
-    "test": "tap test/*spec.js",
-    "lint": "jshint *js"
+    "test": "npm run lint",
+    "lint": "jshint *.js"
   },
   "bin": {
     "repl-it": "./cli.js"
