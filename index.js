@@ -119,10 +119,6 @@ Replit.prototype.getPackageDisplayName = function(pkg){
     newPkg = '_' + newPkg;
   }
 
-  if(pkg !== newPkg && this.opts.verbose){
-    console.log('Naming', pkg, 'as', newPkg, 'in repl');
-  }
-
   return newPkg;
 };
 
@@ -138,6 +134,9 @@ Replit.prototype.loadPackages = function(prefix, packages, cb){
         console.log(pkgName, 'is already defined. Current definition being overwritten by', pkg);
       }
       loadedPackages[pkgName] = require(pkgPath);
+      if(pkg !== pkgName && that.opts.verbose){
+        console.log('Naming', pkg, 'as', pkgName, 'in repl');
+      }
     } catch(e) {
       console.log('Failed to load', pkg);
     }
