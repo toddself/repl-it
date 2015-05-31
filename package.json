@@ -5,11 +5,13 @@
   "main": "index.js",
   "scripts": {
     "test": "npm run lint",
-    "lint": "jshint *.js"
+    "lint": "jshint *.js",
+    "prepublish": "marked-man man.md > repl-it.1"
   },
   "bin": {
     "repl-it": "./cli.js"
   },
+  "man": "./repl-it.1",
   "repository": {
     "type": "git",
     "url": "git://github.com/toddself/repl-it"
@@ -30,6 +32,7 @@
     "xtend": "^4.0.0"
   },
   "devDependencies": {
-    "jshint": "~2.5.6"
+    "jshint": "~2.5.6",
+    "marked-man": "~0.1.4"
   }
 }

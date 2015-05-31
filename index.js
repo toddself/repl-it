@@ -49,17 +49,26 @@ var Replit = module.exports = function(opts){
           useGlobal: true
         };
 
-        if(process.versions.node > 2 && this.opts.magic){
-          replOpts.replMode = repl.REPL_MODE_MAGIC;
-          if(opts.verbose){
-            console.log('Magic mode enabled');
+        if(process.versions.node > 2){
+          if(this.opts.magic){
+            replOpts.replMode = repl.REPL_MODE_MAGIC;
+            if(opts.verbose){
+              console.log('Magic mode enabled');
+            }
+          }
+
+          if(this.opts.strict){
+            replOpts.replMode =repl.REPL_MODE_STRICT
+            if(opts.verbose){
+              console.log('Strict mode enabled');
+            }
           }
         }
 
         var r = repl.start(replOpts);
 
         if(this.opts.history) {
-          setupHistory(r, historyFile, function(){});
+          setupHistory(r, process.env.NODE_REPL_HISTORY_FILE || historyFile, function(){});
         }
 
         Object.keys(pkgs).forEach(function(p){

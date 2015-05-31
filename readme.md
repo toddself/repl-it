@@ -6,7 +6,6 @@ Creates a repl in the current directory with all the packages listed in `devDepe
 * Command line history -- If you're using io.js version 1 or higher you have access to persistant command-line history (enabled by default).  To disable use `--no-history`.
 * "MAGIC" mode -- If you're in io.js 2 or higher, defaults to magic, which will automatically run "strict mode only" statements in strict mode. To disable use `--no-magic`.
 
-
 ## Usage
 
 ```
