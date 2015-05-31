@@ -7,6 +7,8 @@ var xtend = require('xtend');
 var camelCase = require('camel-case');
 var pkginfo = require('pkginfo');
 
+var historyFile = path.join(__dirname, '.repl-it.history');
+
 var Replit = module.exports = function(opts){
   if (!(this instanceof Replit)) {
     return new Replit(opts);
@@ -38,14 +40,27 @@ var Replit = module.exports = function(opts){
           mainPackageLoaded = true;
         };
 
-        if (this.opts.loadmain) {
+        if(this.opts.loadmain){
           loadMain(pkgs);
         }
 
-        var r = repl.start({
+        var replOpts = {
           prompt: projectName+'> ',
           useGlobal: true
-        });
+        };
+
+        if(process.versions.node > 2 && this.opts.magic){
+          replOpts.replMode = repl.REPL_MODE_MAGIC;
+          if(opts.verbose){
+            console.log('Magic mode enabled');
+          }
+        }
+
+        var r = repl.start(replOpts);
+
+        if(this.opts.history) {
+          setupHistory(r, historyFile, function(){});
+        }
 
         Object.keys(pkgs).forEach(function(p){
           r.context[p] = pkgs[p];
@@ -150,3 +165,107 @@ Replit.prototype.handleError = function(err){
     process.exit(1);
   }
 };
+
+
+// copy & paste from node's internal repl...
+function setupHistory(repl, historyPath, ready) {
+  var timer = null;
+  var writing = false;
+  var pending = false;
+  repl.pause && repl.pause();
+  fs.open(historyPath, 'a+', oninit);
+
+  function oninit(err, hnd) {
+    if (err) {
+      return ready(err);
+    }
+    fs.close(hnd, onclose);
+  }
+
+  function onclose(err) {
+    if (err) {
+      return ready(err);
+    }
+    fs.readFile(historyPath, 'utf8', onread);
+  }
+
+  function onread(err, data) {
+    if (err) {
+      return ready(err);
+    }
+
+    if (data) {
+      try {
+        repl.history = JSON.parse(data);
+        if (!Array.isArray(repl.history)) {
+          throw new Error('Expected array, got ' + typeof repl.history);
+        }
+        repl.history.slice(-repl.historySize);
+      } catch (err) {
+        return ready(
+            new Error('Could not parse history data in ' + historyPath));
+      }
+    }
+
+    fs.open(historyPath, 'w', onhandle);
+  }
+
+  function onhandle(err, hnd) {
+    if (err) {
+      return ready(err);
+    }
+    repl._historyHandle = hnd;
+    repl.on('line', online);
+
+    // reading the file data out erases it
+    repl.once('flushHistory', function() {
+      repl.resume && repl.resume();
+      ready(null, repl);
+    });
+    flushHistory();
+  }
+
+  // ------ history listeners ------
+  function online() {
+    repl._flushing = true;
+
+    if (timer) {
+      clearTimeout(timer);
+    }
+
+    timer = setTimeout(flushHistory, 15);
+  }
+
+  function flushHistory() {
+    timer = null;
+    if (writing) {
+      pending = true;
+      return;
+    }
+    writing = true;
+    var historyData = JSON.stringify(repl.history, null, 2);
+    fs.write(repl._historyHandle, historyData, 0, 'utf8', onwritten);
+  }
+
+  function onwritten(err, data) {
+    writing = false;
+    if (pending) {
+      pending = false;
+      online();
+    } else {
+      repl._flushing = Boolean(timer);
+      if (!repl._flushing) {
+        repl.emit('flushHistory');
+      }
+    }
+  }
+}
+
+
+function _replHistoryMessage() {
+  if (this.history.length === 0) {
+    this._refreshLine();
+  }
+  this._historyPrev = Interface.prototype._historyPrev;
+  return this._historyPrev();
+}

@@ -4,18 +4,29 @@
 var fs = require('fs');
 var path = require('path');
 
+var opts = {
+  alias: {
+    h: 'help',
+    l: 'loadmain',
+    v: 'verbose',
+    m: 'magic'
+  },
+  default: {
+    history: true,
+    magic: true,
+    loadmain: false,
+    verbose: false
+  },
+  boolean: ['history', 'magic']
+};
+
 var minimist = require('minimist');
 var replit = require('./');
 
-var argv = minimist(process.argv.slice(2));
+var argv = minimist(process.argv.slice(2), opts);
 
-if(argv.help || argv.h){
+if(argv.h){
 	return fs.createReadStream(path.join(__dirname, 'usage.txt')).pipe(process.stdout);
 }
 
-var opts = {
-	loadmain: (argv.loadmain || argv.l) || false,
-	verbose : (argv.verbose || argv.v) || false
-};
-
-replit(opts);
+replit(argv);

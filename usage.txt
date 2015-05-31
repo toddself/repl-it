@@ -3,3 +3,8 @@ Usage: repl-it [-v] [-l]
 Options:
   -v, --verbose     Explain the camelCase name changes
   -l, --loadmain    Load the main file referenced by package.json by default
+  -m, --no-magic    Disable "magic" mode. You will have to specify strict mode if you want to use strict mode features. Enabled only in node/iojs 2.0 and higher.
+  -s, --strict      Enable strict mode (and turn off magic mode)
+  -h, --help        Show this message
+  --no-history      Disable history (history support only works in io.js/node 1.0 or higher)
+
